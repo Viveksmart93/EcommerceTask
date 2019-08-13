@@ -6,7 +6,7 @@
  * @flow
  */
 
-import React, {Fragment} from 'react';
+import React, { Fragment } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,101 +14,89 @@ import {
   View,
   Text,
   StatusBar,
+  AsyncStorage
 } from 'react-native';
+import { createSwitchNavigator, createDrawerNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
+import { Icon } from 'react-native-elements';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const App = () => {
-  return (
-    <Fragment>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Fragment>
-  );
-};
+import Login from './src/Login';
+import Home from './src/Home';
+import Checkout from './src/Checkout';
+import History from './src/History';
 
-const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+const AuthStack = new createStackNavigator({
+  Login: {
+    screen: Login,
+    navigationOptions: ({ navigation }) => ({
+      title: 'Sign In',
+    })
+  }
 });
 
-export default App;
+
+console.disableYellowBox = true;
+
+const HomeStack = new createStackNavigator(
+  {
+    Home: {
+      screen: Home,
+      navigationOptions: ({ navigation }) => ({
+        title: 'Store',
+        headerMode: 'screen',
+        headerLeft: <Icon iconStyle={{ padding: 10 }} name="menu" onPress={() => navigation.toggleDrawer()} />,
+        headerRight: <Icon iconStyle={{ padding: 10 }} name="md-cart" type="ionicon" onPress={() => navigation.navigate('Checkout')} />
+      })
+    }
+  }
+)
+
+const CheckoutStack = new createStackNavigator(
+  {
+    Checkout: {
+      screen: Checkout,
+      navigationOptions: ({ navigation }) => ({
+        title: 'Checkout',
+        headerLeft: <Icon iconStyle={{ padding: 10 }} name="menu" onPress={() => navigation.toggleDrawer()} />,
+      })
+    }
+  }
+)
+
+const HistoryStack = new createStackNavigator(
+  {
+    History: {
+      screen: History,
+      navigationOptions: ({ navigation }) => ({
+        title: 'History',
+        headerLeft: <Icon iconStyle={{ padding: 10 }} name="menu" onPress={() => navigation.toggleDrawer()} />,
+      })
+    }
+  }
+)
+
+const AppStack = new createDrawerNavigator(
+  {
+    Home: HomeStack,
+    Checkout: CheckoutStack,
+    History: HistoryStack,
+    Logout: {
+      screen: ({ navigation }) => {
+        setTimeout(async () => {
+          await AsyncStorage.removeItem("isLogin").then(() => {
+            console.log('remove item', 'logoutsuccess')
+          })
+          navigation.navigate('Auth');
+        },100);
+        return null;
+      }
+    }
+  }
+)
+
+const AppSwitch = new createSwitchNavigator({
+  Auth: AuthStack,
+  App: AppStack
+});
+
+export default createAppContainer(AppSwitch);
