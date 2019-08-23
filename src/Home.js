@@ -4,6 +4,7 @@ import {
     Text,
     FlatList,
     RefreshControl,
+    TouchableOpacity,
     ActivityIndicator,
     AsyncStorage
 } from 'react-native';
@@ -17,7 +18,8 @@ export default class Home extends React.Component {
         super(props);
         this.state = {
             isLoading: false,
-            products: []
+            products: [],
+            order: props.navigation.getParam('order') || true
         }
     }
 
@@ -26,10 +28,39 @@ export default class Home extends React.Component {
         this.getProduct()
     }
 
+    componentWillReceiveProps(nextProps){
+        this.setState({order:nextProps.navigation.getParam('order')},()=>{
+            this._onRefresh()
+        })
+    }
+
     getProduct = async () => {
         setTimeout(() => {
-            this.setState({ products: Data.products, refreshing: false, isLoading: false })
+            if(this.state.order){
+                this.getAscProductByAmount(Data.products);
+            }else{
+                this.getDescProductByAmount(Data.products);
+            }
+            // this.setState({ products: Data.products, refreshing: false, isLoading: false })
         }, 2000);
+    }
+
+    getAscProductByAmount(product){
+        var result = product.sort((a,b)=>{
+            var a1 = parseInt(a.product_price);
+            var b1 = parseInt(b.product_price);
+            return a1-b1;
+        });
+        this.setState({ products: result, refreshing: false, isLoading: false })
+    }
+
+    getDescProductByAmount(product){
+        var result = product.sort((a,b)=>{
+            var a1 = parseInt(a.product_price);
+            var b1 = parseInt(b.product_price);
+            return b1-a1;
+        });
+        this.setState({ products: result, refreshing: false, isLoading: false })
     }
 
     addToCart = async(item) =>{
@@ -63,8 +94,10 @@ export default class Home extends React.Component {
             </View>}
             image={{ uri: item.product_image_url }}
             containerStyle={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+                {/* <TouchableOpacity onPress={()=>{this.props.navigation.navigate('OrderDetail',{item:item})}}> */}
             <Text style={{ fontSize: 16, color: '#000' }}>{item.product_name}</Text>
             <Text>Rs. {item.product_price}</Text>
+            {/* </TouchableOpacity> */}
         </Card>
     )
 

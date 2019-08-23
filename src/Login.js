@@ -30,11 +30,13 @@ export default class Login extends React.Component {
     }
 
     validateUser(username) {
-        return Data.userInfo.user_name === username;
+        // return Data.userInfo.user_name === username;
+        return true;
     }
 
     validatePassword(password) {
-        return Data.userInfo.password === password;
+        // return Data.userInfo.password === password;
+        return true;
     }
 
     onSubmit = () => {
@@ -44,10 +46,10 @@ export default class Login extends React.Component {
                 isUserValid: this.validateUser(this.state.username) || this.userInput.shake(),
                 isPasswordValid: this.validatePassword(this.state.password) || this.passwordInput.shake()
             }, async() => {
-                if(this.state.isUserValid && this.state.isPasswordValid){
+                // if(this.state.isUserValid && this.state.isPasswordValid){
                     await AsyncStorage.setItem('isLogin',true);
                     this.props.navigation.navigate('App');
-                }
+                // }
                 this.setState({isLoading:false});
             })
         },2000);

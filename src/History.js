@@ -49,6 +49,9 @@ export default class History extends React.Component {
                 <Text style={{flex:1}}>Items {item.item_count}</Text>
                 <Text>Total : {item.total}</Text>
             </View>}
+            onPress={()=>{
+                this.props.navigation.navigate('OrderDetail',{item:item})
+            }}
         />
     )
 
